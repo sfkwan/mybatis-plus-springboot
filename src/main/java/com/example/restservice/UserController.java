@@ -27,6 +27,30 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    public static final class DeleteResult {
+        private final boolean success;
+        private final String message;
+        private final String id;
+
+        public DeleteResult(boolean success, String message, String id) {
+            this.success = success;
+            this.message = message;
+            this.id = id;
+        }
+
+        public boolean isSuccess() {
+            return success;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public String getId() {
+            return id;
+        }
+    }
+
     @GetMapping("")
     public User[] getAllUsers(@RequestParam(required = false) Integer isDeleted) {
         User[] users = userService.listIncludingDeleted(isDeleted).toArray(new User[0]);
@@ -43,11 +67,16 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public User deleteUser(@PathVariable("id") String id) {
-        userService.removeById(id);
+    public DeleteResult deleteUser(@PathVariable("id") String id) {
+        boolean result = userService.removeById(id);
 
-        log.info("Delete user with id " + id);
-        return null;
+        if (result) {
+            log.info("Delete user with id " + id);
+            return new DeleteResult(true, "Deleted user with id " + id, id);
+        }
+
+        log.warn("Failed to delete user with id " + id);
+        return new DeleteResult(false, "Failed to delete user with id " + id, id);
     }
 
     @PutMapping("/{id}")
