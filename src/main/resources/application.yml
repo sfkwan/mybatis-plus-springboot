@@ -1,0 +1,22 @@
+# Conversion to YAML from Properties formar report
+# Errors:
+# - Direct assignment 'spring=' can not be combined with sub-property assignment 'spring.application...'. Direct assignment is dropped!
+spring:
+  application:
+    name: restservice
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:file:./data/testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+  sql:
+    init:
+      mode: never
+      schema-locations:
+        - classpath:db/schema-h2.sql
+      data-locations:
+        - classpath:db/data-h2.sql
+logging:
+  level:
+    "[com.example.restservice]": DEBUG
+    "[com.baomidou.mybatisplus]": DEBUG
