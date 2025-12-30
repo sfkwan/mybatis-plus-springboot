@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,7 +21,8 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // Disable CSRF for POST/PUT/DELETE requests
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.PUT, "/users/**").hasRole("USER") // Secure PUT /users/**
+                        .requestMatchers(HttpMethod.PUT, "/users/**").hasAnyRole("USER", "ADMIN") // Secure PUT
+                                                                                                  // /users/**
                         .anyRequest().permitAll()) // Allow other endpoints
                 .httpBasic(basic -> {
                 }); // Use basic auth
@@ -33,12 +35,20 @@ public class SecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService() {
-        var user = User.builder()
-                .username("admin")
-                .password(passwordEncoder().encode("password123"))
-                .roles("USER")
+    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
+        UserDetails user = User.builder()
+                .username("dikwan")
+                .password(passwordEncoder.encode("password123"))
+                .roles("USER", "VIEWER")
                 .build();
-        return new InMemoryUserDetailsManager(user);
+
+        UserDetails admin = User.builder()
+                .username("admin")
+                .password(passwordEncoder.encode("password123"))
+                .roles("ADMIN")
+                .build();
+
+        return new InMemoryUserDetailsManager(user, admin);
+
     }
 }
