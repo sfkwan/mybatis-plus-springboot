@@ -39,7 +39,7 @@ public class AddUser {
         user.setEmail("testuser@hktd.com");
 
         userMapper.insert(user);
-        log.info("Save user: " + user);
+        log.info("Save user: " + user.toString());
         assertNotNull(user.getId());
 
     }
