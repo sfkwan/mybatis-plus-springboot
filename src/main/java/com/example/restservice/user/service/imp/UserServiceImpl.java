@@ -2,7 +2,6 @@ package com.example.restservice.user.service.imp;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -14,16 +13,18 @@ import com.example.restservice.user.service.UserService;
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
-    @Autowired
     private UserMapper userMapper;
+
+    public UserServiceImpl(UserMapper userMapper) {
+        this.userMapper = userMapper;
+    }
 
     @Override
     public List<User> testQueryWrapper(int age) {
         QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
         userQueryWrapper.ge("age", age);
         // trainList为空不报错
-        List<User> userList = userMapper.selectList(userQueryWrapper);
-        return userList;
+        return userMapper.selectList(userQueryWrapper);
     }
 
     @Override

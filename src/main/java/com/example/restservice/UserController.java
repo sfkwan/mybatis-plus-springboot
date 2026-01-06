@@ -2,7 +2,6 @@ package com.example.restservice;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,66 +19,55 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.restservice.user.entity.User;
 import com.example.restservice.user.service.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/users")
+@Tag(name = "User Management", description = "APIs for managing users")
 public class UserController {
     private Logger log = LoggerFactory.getLogger(getClass());
-    @Autowired
     private UserService userService;
 
-    public static final class DeleteResult {
-        private final boolean success;
-        private final String message;
-        private final String id;
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
-        public DeleteResult(boolean success, String message, String id) {
-            this.success = success;
-            this.message = message;
-            this.id = id;
-        }
-
-        public boolean isSuccess() {
-            return success;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public String getId() {
-            return id;
-        }
+    public record DeleteResult(boolean success, String message, String id) {
     }
 
     @GetMapping("")
+    @Operation(summary = "Get all users", description = "Retrieve all users with optional filter for deleted status")
     public User[] getAllUsers(@RequestParam(required = false) Integer isDeleted) {
-        User[] users = userService.listIncludingDeleted(isDeleted).toArray(new User[0]);
-        return users;
+        return userService.listIncludingDeleted(isDeleted).toArray(new User[0]);
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Get user by ID", description = "Retrieve a specific user by their ID")
     public User getUser(@PathVariable("id") String id) {
         LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(User::getId, id);
         User user = userService.getBaseMapper().selectOne(lambdaQueryWrapper);
-        log.info("User with id " + id + ": " + (user != null ? user.toString() : "null"));
+        log.info("User with id {}: {}", id, user);
         return user;
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Delete user", description = "Delete a user by their ID")
     public DeleteResult deleteUser(@PathVariable("id") String id) {
         boolean result = userService.removeById(id);
 
         if (result) {
-            log.info("Delete user with id " + id);
+            log.info("Delete user with id {}", id);
             return new DeleteResult(true, "Deleted user with id " + id, id);
         }
 
-        log.warn("Failed to delete user with id " + id);
+        log.warn("Failed to delete user with id {}", id);
         return new DeleteResult(false, "Failed to delete user with id " + id, id);
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Update user", description = "Update an existing user's information")
     public User putUser(@RequestBody User userParam, @PathVariable("id") String id) {
         User user = userService.getById(id);
         if (user == null) {
@@ -94,13 +82,15 @@ public class UserController {
                 .set(userParam.getDepartmentId() != null, User::getDepartmentId, userParam.getDepartmentId());
 
         userService.update(updateWrapper);
-        log.info("Update user: " + userService.getById(id));
+        User updatedUser = userService.getById(id);
+        log.info("Update user: {}", updatedUser);
 
-        return userService.getById(id);
+        return updatedUser;
 
     }
 
     @PostMapping("")
+    @Operation(summary = "Create user", description = "Create a new user")
     public User saveUser(@RequestBody User userParam) {
         User user = new User();
         user.setAge(userParam.getAge());
@@ -109,7 +99,7 @@ public class UserController {
         user.setDepartmentId(userParam.getDepartmentId());
 
         userService.save(user);
-        log.info("Save user: " + user);
+        log.info("Save user: {}", user);
 
         return user;
 
@@ -117,6 +107,7 @@ public class UserController {
 
     // 分页查询
     @GetMapping("/page")
+    @Operation(summary = "Get users page", description = "Retrieve users with pagination and optional name filter")
     public IPage<User> findPage(@RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(required = false) String name) {
