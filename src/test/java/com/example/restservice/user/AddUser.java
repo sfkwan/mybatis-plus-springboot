@@ -15,31 +15,31 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SpringBootTest(classes = RestserviceApplication.class)
-public class AddUser {
+class AddUserTest {
     private Logger log = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private UserMapper userMapper;
 
     @BeforeEach
-    public void before() {
+    void before() {
         log.info("init some data");
     }
 
     @AfterEach
-    public void after() {
+    void after() {
         log.info("clean some data");
     }
 
     @Test
-    public void saveUser() {
+    void saveUser() {
         User user = new User();
         user.setAge(10);
         user.setName("testuser");
         user.setEmail("testuser@hktd.com");
 
         userMapper.insert(user);
-        log.info("Save user: " + user.toString());
+        log.info("Save user: {}", user);
         assertNotNull(user.getId());
 
     }

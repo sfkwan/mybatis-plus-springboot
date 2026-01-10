@@ -1,6 +1,6 @@
 package com.example.restservice;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 import org.apache.ibatis.reflection.MetaObject;
 import org.springframework.stereotype.Component;
@@ -12,12 +12,12 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
 
     @Override
     public void insertFill(MetaObject metaObject) {
-        this.strictInsertFill(metaObject, "createTime", LocalDateTime.class, LocalDateTime.now());
-        this.strictInsertFill(metaObject, "updateTime", LocalDateTime.class, LocalDateTime.now());
+        this.strictInsertFill(metaObject, "createTime", ZonedDateTime.class, ZonedDateTime.now());
+        this.strictInsertFill(metaObject, "updateTime", ZonedDateTime.class, ZonedDateTime.now());
     }
 
     @Override
     public void updateFill(MetaObject metaObject) {
-        this.setFieldValByName("updateTime", LocalDateTime.now(), metaObject);
+        this.setFieldValByName("updateTime", ZonedDateTime.now(), metaObject);
     }
 }

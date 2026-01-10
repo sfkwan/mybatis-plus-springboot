@@ -1,8 +1,5 @@
 package com.example.restservice;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,7 +8,20 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+import jakarta.validation.Valid;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -19,72 +29,98 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.restservice.user.entity.User;
 import com.example.restservice.user.service.UserService;
+import com.example.restservice.exception.ApiException;
+import com.example.restservice.exception.ErrorResponse;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequiredArgsConstructor
+@Slf4j
+@Tag(name = "User Management", description = "APIs for managing users")
 public class UserController {
-    private Logger log = LoggerFactory.getLogger(getClass());
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    public static final class DeleteResult {
-        private final boolean success;
-        private final String message;
-        private final String id;
-
-        public DeleteResult(boolean success, String message, String id) {
-            this.success = success;
-            this.message = message;
-            this.id = id;
-        }
-
-        public boolean isSuccess() {
-            return success;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public String getId() {
-            return id;
-        }
+    public record DeleteResult(boolean success, String message, String id) {
     }
 
     @GetMapping("")
-    public User[] getAllUsers(@RequestParam(required = false) Integer isDeleted) {
-        User[] users = userService.listIncludingDeleted(isDeleted).toArray(new User[0]);
-        return users;
+    @Operation(summary = "Get all users", description = "Retrieves a list of all users, optionally filtered by deleted status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved users"),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public User[] getAllUsers(
+            @Parameter(description = "Filter by deleted status (0 for not deleted, 1 for deleted)") @RequestParam(required = false) Integer isDeleted) {
+        return userService.listIncludingDeleted(isDeleted).toArray(new User[0]);
     }
 
+    /**
+     * Retrieves a user by their ID.
+     * 
+     * @param id the user ID
+     * @return the user if found
+     * @apiNote Returns ErrorResponse with status 404 if user is not found,
+     *          or status 500 for internal server errors
+     */
     @GetMapping("/{id}")
-    public User getUser(@PathVariable("id") String id) {
+    @Operation(summary = "Get user by ID", description = "Retrieves a specific user by their ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved user"),
+            @ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public User getUser(@Parameter(description = "User ID") @PathVariable("id") String id) {
         LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(User::getId, id);
         User user = userService.getBaseMapper().selectOne(lambdaQueryWrapper);
-        log.info("User with id " + id + ": " + (user != null ? user.toString() : "null"));
+        log.info("User with id {}: {}", id, user);
         return user;
     }
 
     @DeleteMapping("/{id}")
-    public DeleteResult deleteUser(@PathVariable("id") String id) {
+    @Operation(summary = "Delete user by ID", description = "Deletes a user by their ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully deleted user"),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public DeleteResult deleteUser(@Parameter(description = "User ID") @PathVariable("id") String id) {
         boolean result = userService.removeById(id);
 
         if (result) {
-            log.info("Delete user with id " + id);
+            log.info("Delete user with id {}", id);
             return new DeleteResult(true, "Deleted user with id " + id, id);
         }
 
-        log.warn("Failed to delete user with id " + id);
+        log.warn("Failed to delete user with id {}", id);
         return new DeleteResult(false, "Failed to delete user with id " + id, id);
     }
 
+    /**
+     * Updates an existing user by their ID.
+     * 
+     * @param userParam the user data to update
+     * @param id        the user ID
+     * @return the updated user
+     * @throws ApiException with status 404 and code "USER_NOT_FOUND" if the user
+     *                      doesn't exist
+     * @apiNote Returns ErrorResponse with status 404 when update fails (user not
+     *          found),
+     *          status 400 for validation errors with field-specific error details,
+     *          or status 500 for internal server errors
+     */
     @PutMapping("/{id}")
-    public User putUser(@RequestBody User userParam, @PathVariable("id") String id) {
-        User user = userService.getById(id);
-        if (user == null) {
-            throw new RuntimeException("User not found");
-        }
+    @Operation(summary = "Update user by ID", description = "Updates an existing user by their ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully updated user"),
+            @ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public User putUser(@Valid @RequestBody User userParam,
+            @Parameter(description = "User ID") @PathVariable("id") String id) {
 
         LambdaUpdateWrapper<User> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(User::getId, id)
@@ -93,15 +129,36 @@ public class UserController {
                 .set(userParam.getEmail() != null, User::getEmail, userParam.getEmail())
                 .set(userParam.getDepartmentId() != null, User::getDepartmentId, userParam.getDepartmentId());
 
-        userService.update(updateWrapper);
-        log.info("Update user: " + userService.getById(id));
+        boolean result = userService.update(updateWrapper);
+        if (!result) {
+            throw new ApiException(org.springframework.http.HttpStatus.NOT_FOUND,
+                    "USER_NOT_FOUND",
+                    String.valueOf(HttpStatus.NOT_FOUND.value()));
+        }
+        log.info("Update user: {}", userService.getById(id));
 
         return userService.getById(id);
 
     }
 
+    /**
+     * Creates a new user.
+     * 
+     * @param userParam the user data to create
+     * @return the created user with generated ID and timestamps
+     * @apiNote Returns ErrorResponse with status 400 for validation errors with
+     *          field-specific error details,
+     *          or status 500 for internal server errors
+     */
     @PostMapping("")
-    public User saveUser(@RequestBody User userParam) {
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Create new user", description = "Creates a new user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Successfully created user"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public User saveUser(@Valid @RequestBody User userParam) {
         User user = new User();
         user.setAge(userParam.getAge());
         user.setName(userParam.getName());
@@ -109,7 +166,7 @@ public class UserController {
         user.setDepartmentId(userParam.getDepartmentId());
 
         userService.save(user);
-        log.info("Save user: " + user);
+        log.info("Save user: {}", user);
 
         return user;
 
@@ -117,9 +174,15 @@ public class UserController {
 
     // 分页查询
     @GetMapping("/page")
-    public IPage<User> findPage(@RequestParam(defaultValue = "1") Integer pageNum,
-            @RequestParam(defaultValue = "10") Integer pageSize,
-            @RequestParam(required = false) String name) {
+    @Operation(summary = "Get users with pagination", description = "Retrieves users with pagination and optional name filtering")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved paginated users"),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public IPage<User> findPage(
+            @Parameter(description = "Page number (default: 1)") @RequestParam(defaultValue = "1") Integer pageNum,
+            @Parameter(description = "Page size (default: 10)") @RequestParam(defaultValue = "10") Integer pageSize,
+            @Parameter(description = "Filter by name") @RequestParam(required = false) String name) {
         IPage<User> page = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<User> lambda = new LambdaQueryWrapper<>();
         if (name != null && !"".equals(name)) {

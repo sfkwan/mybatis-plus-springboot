@@ -3,8 +3,8 @@ package com.example.restservice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -23,24 +23,24 @@ public class CustomDataPermissionHandler implements DataPermissionHandler {
         // Get the current user from Spring Security context
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = null;
-        List<String> userroles = List.of();
+        List<String> userRoles = null;
 
         if (authentication != null && authentication.isAuthenticated()) {
             Object principal = authentication.getPrincipal();
 
-            if (principal instanceof UserDetails) {
-                username = ((UserDetails) principal).getUsername();
+            if (principal instanceof UserDetails userDetails) {
+                username = userDetails.getUsername();
             } else {
                 username = principal.toString();
             }
 
             // Extract user roles
-            userroles = authentication.getAuthorities().stream()
-                    .map(authority -> authority.getAuthority())
-                    .collect(Collectors.toList());
+            userRoles = authentication.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .toList();
         }
 
-        log.info("Generating data permission SQL for user: {}, roles: {}", username, userroles);
+        log.info("Generating data permission SQL for user: {}, roles: {}", username, userRoles);
 
         // Example: Restrict data to a specific department IDs based on the
         // authenticated user

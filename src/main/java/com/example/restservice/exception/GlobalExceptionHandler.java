@@ -1,0 +1,80 @@
+package com.example.restservice.exception;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import jakarta.servlet.http.HttpServletRequest;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@ControllerAdvice
+@Slf4j
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<ErrorResponse> handleApiException(ApiException ex, HttpServletRequest request) {
+        log.error("API Exception: {}", ex.getMessage());
+
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setTimestamp(ZonedDateTime.now());
+        HttpStatus status = ex.getStatus() != null ? ex.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+        errorResponse.setStatus(status.value());
+        errorResponse.setError(status.getReasonPhrase());
+        errorResponse.setMessage(ex.getMessage());
+        errorResponse.setPath(request.getRequestURI());
+        errorResponse.setErrors(ex.getErrors());
+
+        return new ResponseEntity<>(errorResponse, status);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex,
+            HttpServletRequest request) {
+        log.error("Validation Exception: {}", ex.getMessage(), ex);
+
+        List<ErrorResponse.FieldError> fieldErrors = new ArrayList<>();
+        ex.getBindingResult().getAllErrors().forEach(error -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            String errorCode = error.getCode() != null ? error.getCode() : "VALIDATION_ERROR";
+
+            ErrorResponse.FieldError fieldError = new ErrorResponse.FieldError();
+            fieldError.setCode(errorCode);
+            fieldError.setMessage(errorMessage);
+            fieldError.setField(fieldName);
+            fieldErrors.add(fieldError);
+        });
+
+        String message = "Validation failed for " + fieldErrors.size() + " field(s)";
+
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setTimestamp(ZonedDateTime.now());
+        errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());
+        errorResponse.setError(HttpStatus.BAD_REQUEST.getReasonPhrase());
+        errorResponse.setMessage(message);
+        errorResponse.setPath(request.getRequestURI());
+        errorResponse.setErrors(fieldErrors);
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGlobalException(Exception ex, HttpServletRequest request) {
+        log.error("Unexpected error: {}", ex.getMessage(), ex);
+
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setTimestamp(ZonedDateTime.now());
+        errorResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        errorResponse.setError(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+        errorResponse.setMessage("An unexpected error occurred");
+        errorResponse.setPath(request.getRequestURI());
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+}

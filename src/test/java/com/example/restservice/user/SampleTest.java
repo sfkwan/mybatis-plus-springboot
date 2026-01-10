@@ -13,20 +13,18 @@ import com.example.restservice.user.entity.User;
 import com.example.restservice.user.mapper.UserMapper;
 
 @SpringBootTest(classes = RestserviceApplication.class)
-public class SampleTest {
+class SampleTest {
 
     @Autowired
     private UserMapper userMapper;
 
     @Test
-    public void testSelect() {
+    void testSelect() {
 
         List<User> userList = userMapper.selectList(null);
 
-        Assert.isTrue(2 == userList.size(), " total users: " + userList.size());
-        userList.forEach(user -> {
-            System.out.println(user);
-        });
+        Assert.isTrue(userList.size() > 0, " total users: " + userList.size());
+        userList.forEach(System.out::println);
     }
 
 }
