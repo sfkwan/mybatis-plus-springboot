@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS `user`;
 
 CREATE TABLE `user` (
-    id VARCHAR(30) NOT NULL COMMENT 'Primary Key ID',
+    id BIGINT NOT NULL COMMENT 'Primary Key ID (snowflake)',
     name VARCHAR(30) NULL DEFAULT NULL COMMENT 'Name',
     age INT NULL DEFAULT NULL COMMENT 'Age',
     email VARCHAR(50) NULL DEFAULT NULL COMMENT 'Email',

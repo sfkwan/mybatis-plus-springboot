@@ -1,7 +1,5 @@
 package com.example.restservice;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.util.List;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -9,15 +7,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.baomidou.mybatisplus.extension.plugins.handler.DataPermissionHandler;
+
+import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 
 // You need to implement the logic to get the current user's permission SQL segment
+@Slf4j
 public class CustomDataPermissionHandler implements DataPermissionHandler {
-
-    private Logger log = LoggerFactory.getLogger(getClass());
-
     @Override
     public Expression getSqlSegment(Expression where, String mappedStatementId) {
         // Get the current user from Spring Security context

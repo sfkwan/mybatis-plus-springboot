@@ -23,10 +23,10 @@ public class GlobalExceptionHandler {
 
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setTimestamp(ZonedDateTime.now());
-        HttpStatus status = ex.getStatus() != null ? ex.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
-        errorResponse.setStatus(status.value());
-        errorResponse.setError(status.getReasonPhrase());
+        HttpStatus status = ex.getHttpStatus() != null ? ex.getHttpStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+        errorResponse.setCode(ex.getCode() != null ? ex.getCode() : status.toString());
         errorResponse.setMessage(ex.getMessage());
+        errorResponse.setError(status.getReasonPhrase());
         errorResponse.setPath(request.getRequestURI());
         errorResponse.setErrors(ex.getErrors());
 
@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
 
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setTimestamp(ZonedDateTime.now());
-        errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());
+        errorResponse.setCode(HttpStatus.BAD_REQUEST.toString());
         errorResponse.setError(HttpStatus.BAD_REQUEST.getReasonPhrase());
         errorResponse.setMessage(message);
         errorResponse.setPath(request.getRequestURI());
@@ -70,7 +70,7 @@ public class GlobalExceptionHandler {
 
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setTimestamp(ZonedDateTime.now());
-        errorResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        errorResponse.setCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
         errorResponse.setError(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
         errorResponse.setMessage("An unexpected error occurred");
         errorResponse.setPath(request.getRequestURI());

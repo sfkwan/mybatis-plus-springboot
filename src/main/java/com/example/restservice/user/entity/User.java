@@ -10,11 +10,14 @@ import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import lombok.Data;
@@ -23,13 +26,18 @@ import lombok.Data;
 @TableName("`user`")
 @Schema(description = "User entity representing a system user with profile and metadata information")
 public class User {
+    @TableId(type = IdType.ASSIGN_ID)
+    @JsonSerialize(using = ToStringSerializer.class)
+    @Schema(description = "User ID", type = "string", example = "755637593648250880", accessMode = Schema.AccessMode.READ_ONLY)
+    private String id;
+
     @Min(0)
     @Schema(description = "User age", example = "30")
     private Integer age;
 
     @TableField(fill = FieldFill.INSERT, value = "create_time")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss z")
-    @Schema(description = "User creation timestamp", example = "2024-01-11 10:30:00 UTC")
+    @Schema(description = "User creation timestamp", example = "2024-01-11 10:30:00 UTC", accessMode = Schema.AccessMode.READ_ONLY)
     private ZonedDateTime createTime;
 
     @TableLogic
@@ -37,23 +45,22 @@ public class User {
     private Integer deleted;
 
     @Schema(description = "Department ID", example = "DEPT001")
+    @Size(max = 10)
     private String departmentId;
 
+    @NotBlank
     @Email
-    @Schema(description = "User email address", example = "john@example.com")
+    @Schema(description = "User email address", example = "john@example.com", requiredMode = Schema.RequiredMode.REQUIRED)
     private String email;
 
-    @TableId(type = IdType.ASSIGN_ID)
-    @Schema(description = "User ID", example = "1234567890")
-    private String id;
-
     @Size(max = 10)
-    @Schema(description = "User name", example = "John Doe")
+    // @NotBlank
+    @Schema(description = "User name", example = "John Doe", requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
     @TableField(fill = FieldFill.INSERT_UPDATE, value = "update_time")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss z")
-    @Schema(description = "User last update timestamp", example = "2024-01-11 14:45:00 UTC")
+    @Schema(description = "User last update timestamp", example = "2024-01-11 14:45:00 UTC", accessMode = Schema.AccessMode.READ_ONLY)
     private ZonedDateTime updateTime;
 
 }

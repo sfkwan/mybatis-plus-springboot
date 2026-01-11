@@ -6,40 +6,206 @@ INSERT INTO
         name,
         age,
         email,
-        department_id
+        department_id,
+        deleted
     )
 VALUES (
-        1,
+        755637593648250880,
         'Jone',
         18,
         'test1@baomidou.com',
-        '1'
+        '1',
+        0
     ),
     (
-        2,
+        755637593652445184,
         'Jack',
         20,
         'test2@baomidou.com',
-        '2'
+        '2',
+        0
     ),
     (
-        3,
+        755637593656639488,
         'Tom',
         28,
         'test3@baomidou.com',
-        '3'
+        '3',
+        0
     ),
     (
-        4,
+        755637593660833792,
         'Sandy',
         21,
         'test4@baomidou.com',
-        '4'
+        '4',
+        0
     ),
     (
-        5,
+        755637593665028096,
         'Billie',
         24,
         'test5@baomidou.com',
-        '5'
+        '5',
+        0
+    ),
+    (
+        755637593669222400,
+        'Alice',
+        25,
+        'test6@baomidou.com',
+        '1',
+        0
+    ),
+    (
+        755637593673416704,
+        'Bob',
+        32,
+        'test7@baomidou.com',
+        '2',
+        0
+    ),
+    (
+        755637593677611008,
+        'Charlie',
+        29,
+        'test8@baomidou.com',
+        '3',
+        0
+    ),
+    (
+        755637593681805312,
+        'Diana',
+        27,
+        'test9@baomidou.com',
+        '4',
+        0
+    ),
+    (
+        755637593685999616,
+        'Edward',
+        35,
+        'test10@baomidou.com',
+        '5',
+        0
+    ),
+    (
+        755637593690193920,
+        'Fiona',
+        23,
+        'test11@baomidou.com',
+        '1',
+        0
+    ),
+    (
+        755637593694388224,
+        'George',
+        31,
+        'test12@baomidou.com',
+        '2',
+        0
+    ),
+    (
+        755637593698582528,
+        'Hannah',
+        26,
+        'test13@baomidou.com',
+        '3',
+        0
+    ),
+    (
+        755637593702776832,
+        'Isaac',
+        33,
+        'test14@baomidou.com',
+        '4',
+        0
+    ),
+    (
+        755637593706971136,
+        'Julia',
+        22,
+        'test15@baomidou.com',
+        '5',
+        0
+    ),
+    (
+        755637593711165440,
+        'Kevin',
+        30,
+        'test16@baomidou.com',
+        '1',
+        1
+    ),
+    (
+        755637593715359744,
+        'Laura',
+        28,
+        'test17@baomidou.com',
+        '2',
+        1
+    ),
+    (
+        755637593719554048,
+        'Michael',
+        34,
+        'test18@baomidou.com',
+        '3',
+        1
+    ),
+    (
+        755637593723748352,
+        'Nina',
+        24,
+        'test19@baomidou.com',
+        '4',
+        1
+    ),
+    (
+        755637593727942656,
+        'Oscar',
+        29,
+        'test20@baomidou.com',
+        '5',
+        1
+    ),
+    (
+        755637593732136960,
+        'Paula',
+        27,
+        'test21@baomidou.com',
+        '1',
+        1
+    ),
+    (
+        755637593736331264,
+        'Quinn',
+        31,
+        'test22@baomidou.com',
+        '2',
+        1
+    ),
+    (
+        755637593740525568,
+        'Rachel',
+        25,
+        'test23@baomidou.com',
+        '3',
+        1
+    ),
+    (
+        755637593744719872,
+        'Steven',
+        36,
+        'test24@baomidou.com',
+        '4',
+        1
+    ),
+    (
+        755637593748914176,
+        'Tina',
+        23,
+        'test25@baomidou.com',
+        '5',
+        1
     );

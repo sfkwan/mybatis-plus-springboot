@@ -27,8 +27,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public List<User> listIncludingDeleted(Integer isDeleted) {
-        return userMapper.selectAllIncludeDeleted(isDeleted);
+    public List<User> selectAll(Integer isDeleted, long size, long offset) {
+        return userMapper.selectAll(isDeleted, size, offset);
+    }
+
+    @Override
+    public long countAll(Integer isDeleted) {
+        return userMapper.countAll(isDeleted);
     }
 
 }
