@@ -35,6 +35,7 @@ import com.example.restservice.user.service.UserService;
 import com.example.restservice.exception.ApiException;
 import com.example.restservice.exception.ErrorResponse;
 import com.example.restservice.genericresponse.ApiResult;
+import com.example.restservice.genericresponse.PagedApiResult;
 import com.example.restservice.genericresponse.DeleteResult;
 
 import lombok.RequiredArgsConstructor;
@@ -54,7 +55,7 @@ public class UserController {
                         @ApiResponse(responseCode = "200", description = "Successfully retrieved users"),
                         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
-        public ApiResult<List<User>> getAllUsers(
+        public PagedApiResult<List<User>> getAllUsers(
                         @Parameter(description = "Page number (default: 1)") @RequestParam(defaultValue = "1") Integer pageNum,
                         @Parameter(description = "Page size (default: 10)") @RequestParam(defaultValue = "10") Integer pageSize,
                         @Parameter(description = "Filter by deleted status (0 for not deleted, 1 for deleted)") @RequestParam(required = false) Integer isDeleted) {
@@ -65,7 +66,7 @@ public class UserController {
                 long totalPages = (total + pageSize - 1) / pageSize;
                 log.info("Paginated users: total {} records, current page {} records, total pages {}",
                                 total, records.size(), totalPages);
-                return new ApiResult<>(records, total, totalPages, records.size());
+                return new PagedApiResult<>(total, totalPages, records.size(), records);
         }
 
         /**
@@ -191,7 +192,7 @@ public class UserController {
                         @ApiResponse(responseCode = "200", description = "Successfully retrieved paginated users"),
                         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
-        public ApiResult<List<User>> findPage(
+        public PagedApiResult<List<User>> findPage(
                         @Parameter(description = "Page number (default: 1)") @RequestParam(defaultValue = "1") Integer pageNum,
                         @Parameter(description = "Page size (default: 10)") @RequestParam(defaultValue = "10") Integer pageSize,
                         @Parameter(description = "Filter by name") @RequestParam(required = false) String name) {
@@ -203,7 +204,7 @@ public class UserController {
                 IPage<User> userPage = userService.page(page, lambda);
                 log.info("Paginated users: total {} records, current page {} records, total pages {}",
                                 userPage.getTotal(), userPage.getRecords().size(), userPage.getPages());
-                return new ApiResult<>(userPage.getRecords(), userPage.getTotal(), userPage.getPages(),
-                                userPage.getRecords().size());
+                return new PagedApiResult<>(userPage.getTotal(), userPage.getPages(), userPage.getRecords().size(),
+                                userPage.getRecords());
         }
 }
