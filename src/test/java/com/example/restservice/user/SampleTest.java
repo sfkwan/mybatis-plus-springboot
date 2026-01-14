@@ -9,7 +9,7 @@ import java.util.List;
 import org.springframework.util.Assert;
 
 import com.example.restservice.RestserviceApplication;
-import com.example.restservice.user.entity.User;
+import com.example.restservice.user.entity.UserEntity;
 import com.example.restservice.user.mapper.UserMapper;
 
 @SpringBootTest(classes = RestserviceApplication.class)
@@ -21,7 +21,7 @@ class SampleTest {
     @Test
     void testSelect() {
 
-        List<User> userList = userMapper.selectList(null);
+        List<UserEntity> userList = userMapper.selectList(null);
 
         Assert.isTrue(userList.size() > 0, " total users: " + userList.size());
         userList.forEach(System.out::println);

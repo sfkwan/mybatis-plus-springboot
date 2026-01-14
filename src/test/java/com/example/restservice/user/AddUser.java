@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.example.restservice.RestserviceApplication;
-import com.example.restservice.user.entity.User;
+import com.example.restservice.user.entity.UserEntity;
 import com.example.restservice.user.mapper.UserMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +33,7 @@ class AddUserTest {
 
     @Test
     void saveUser() {
-        User user = new User();
+        UserEntity user = new UserEntity();
         user.setAge(10);
         user.setName("testuser");
         user.setEmail("testuser@hktd.com");

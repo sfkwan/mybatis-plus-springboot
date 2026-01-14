@@ -25,8 +25,9 @@ import lombok.Data;
 @Data
 @TableName("`user`")
 @Schema(description = "User entity representing a system user with profile and metadata information")
-public class User {
+public class UserEntity {
     @TableId(type = IdType.ASSIGN_ID)
+    @Size(max = 20)
     @JsonSerialize(using = ToStringSerializer.class)
     @Schema(description = "User ID", type = "string", example = "755637593648250880", accessMode = Schema.AccessMode.READ_ONLY)
     private String id;
@@ -45,7 +46,7 @@ public class User {
     private Integer deleted;
 
     @Schema(description = "Department ID", example = "DEPT001")
-    @Size(max = 10)
+    @Size(max = 5)
     private String departmentId;
 
     @NotBlank

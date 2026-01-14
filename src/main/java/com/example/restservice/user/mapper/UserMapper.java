@@ -6,14 +6,14 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.example.restservice.user.entity.User;
+import com.example.restservice.user.entity.UserEntity;
 
-public interface UserMapper extends BaseMapper<User> {
-    @Select("SELECT id, name, age, email, department_id, deleted, create_time, update_time FROM `user` "
-            + "WHERE (#{isDeleted} IS NULL OR deleted = #{isDeleted}) LIMIT #{size} OFFSET #{offset}")
-    List<User> selectAll(@Param("isDeleted") Integer isDeleted, @Param("size") long size,
-            @Param("offset") long offset);
+public interface UserMapper extends BaseMapper<UserEntity> {
+        @Select("SELECT id, name, age, email, department_id, deleted, create_time, update_time FROM `user` "
+                        + "WHERE (#{isDeleted} IS NULL OR deleted = #{isDeleted}) LIMIT #{size} OFFSET #{offset}")
+        List<UserEntity> selectAll(@Param("isDeleted") Integer isDeleted, @Param("size") long size,
+                        @Param("offset") long offset);
 
-    @Select("SELECT COUNT(*) FROM `user` WHERE (#{isDeleted} IS NULL OR deleted = #{isDeleted})")
-    long countAll(@Param("isDeleted") Integer isDeleted);
+        @Select("SELECT COUNT(*) FROM `user` WHERE (#{isDeleted} IS NULL OR deleted = #{isDeleted})")
+        long countAll(@Param("isDeleted") Integer isDeleted);
 }

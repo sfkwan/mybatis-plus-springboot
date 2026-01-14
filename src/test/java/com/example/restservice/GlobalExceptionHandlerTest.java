@@ -3,7 +3,7 @@ package com.example.restservice;
 import com.example.restservice.exception.ApiException;
 import com.example.restservice.exception.ErrorResponse;
 import com.example.restservice.exception.GlobalExceptionHandler;
-import com.example.restservice.user.entity.User;
+import com.example.restservice.user.entity.UserEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -120,7 +120,8 @@ class GlobalExceptionHandlerTest {
                                 "Email format is invalid"));
 
                 // Create MethodParameter for the userParam in putUser method
-                java.lang.reflect.Method method = UserController.class.getMethod("putUser", User.class, String.class);
+                java.lang.reflect.Method method = UserController.class.getMethod("putUser", UserEntity.class,
+                                String.class);
                 MethodParameter methodParameter = new MethodParameter(method, 0);
 
                 MethodArgumentNotValidException validationException = new MethodArgumentNotValidException(

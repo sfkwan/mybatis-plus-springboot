@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
+
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +42,7 @@ public class GlobalExceptionHandler {
 
         List<ErrorResponse.FieldError> fieldErrors = new ArrayList<>();
         ex.getBindingResult().getAllErrors().forEach(error -> {
+
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
             String errorCode = error.getCode() != null ? error.getCode() : "VALIDATION_ERROR";
@@ -51,13 +54,38 @@ public class GlobalExceptionHandler {
             fieldErrors.add(fieldError);
         });
 
-        String message = "Validation failed for " + fieldErrors.size() + " field(s)";
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setTimestamp(ZonedDateTime.now());
+        errorResponse.setCode(HttpStatus.BAD_REQUEST.toString());
+        errorResponse.setError(HttpStatus.BAD_REQUEST.getReasonPhrase());
+        errorResponse.setMessage(ex.getMessage());
+        errorResponse.setPath(request.getRequestURI());
+        errorResponse.setErrors(fieldErrors);
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    // Handles @Validated on query/path params
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(
+            ConstraintViolationException ex, HttpServletRequest request) {
+        List<ErrorResponse.FieldError> fieldErrors = new ArrayList<>();
+        log.error("Constraint Violation Exception: {}", ex, ex);
+        ex.getConstraintViolations().forEach(violation -> {
+
+            ErrorResponse.FieldError fieldError = new ErrorResponse.FieldError();
+            fieldError.setField(violation.getPropertyPath().toString());
+            fieldError.setMessage(violation.getMessage());
+            fieldError.setCode("400");
+            fieldErrors.add(fieldError);
+
+        });
 
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setTimestamp(ZonedDateTime.now());
         errorResponse.setCode(HttpStatus.BAD_REQUEST.toString());
         errorResponse.setError(HttpStatus.BAD_REQUEST.getReasonPhrase());
-        errorResponse.setMessage(message);
+        errorResponse.setMessage(ex.getMessage());
         errorResponse.setPath(request.getRequestURI());
         errorResponse.setErrors(fieldErrors);
 

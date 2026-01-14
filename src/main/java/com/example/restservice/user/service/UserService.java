@@ -3,11 +3,11 @@ package com.example.restservice.user.service;
 import java.util.List;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.example.restservice.user.entity.User;
+import com.example.restservice.user.entity.UserEntity;
 
 public interface UserService
-        extends IService<User> {
-    public List<User> testQueryWrapper(int age);
+        extends IService<UserEntity> {
+    public List<UserEntity> testQueryWrapper(int age);
 
     /**
      * Retrieves a paginated list of users, optionally filtering by deleted status.
@@ -20,7 +20,7 @@ public interface UserService
      * @param offset    the starting index for pagination (offset)
      * @return a list of User objects matching the criteria
      */
-    List<User> selectAll(Integer isDeleted, long size, long offset);
+    List<UserEntity> selectAll(Integer isDeleted, long size, long offset);
 
     /**
      * Counts users optionally filtering by deleted status.

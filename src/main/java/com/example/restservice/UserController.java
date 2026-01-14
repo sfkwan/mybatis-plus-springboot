@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.validation.annotation.Validated;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -25,12 +26,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Size;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.example.restservice.user.entity.User;
+import com.example.restservice.user.entity.UserEntity;
 import com.example.restservice.user.service.UserService;
 import com.example.restservice.exception.ApiException;
 import com.example.restservice.exception.ErrorResponse;
@@ -45,6 +48,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 @Tag(name = "User Management", description = "APIs for managing users")
 public class UserController {
         private final UserService userService;
@@ -55,14 +59,14 @@ public class UserController {
                         @ApiResponse(responseCode = "200", description = "Successfully retrieved users"),
                         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
-        public PagedApiResult<List<User>> getAllUsers(
-                        @Parameter(description = "Page number (default: 1)") @RequestParam(defaultValue = "1") Integer pageNum,
-                        @Parameter(description = "Page size (default: 10)") @RequestParam(defaultValue = "10") Integer pageSize,
+        public PagedApiResult<List<UserEntity>> getAllUsers(
+                        @Parameter(description = "Page number (default: 1, max: 10)", schema = @Schema(type = "integer", maximum = "10", example = "1")) @RequestParam(defaultValue = "1") @Max(10) Integer pageNum,
+                        @Parameter(description = "Page size (default: 10, max: 50)", schema = @Schema(type = "integer", maximum = "50", example = "10")) @RequestParam(defaultValue = "10") @Max(50) Integer pageSize,
                         @Parameter(description = "Filter by deleted status (0 for not deleted, 1 for deleted)") @RequestParam(required = false) Integer isDeleted) {
 
                 long total = userService.countAll(isDeleted);
                 long offset = (pageNum - 1L) * pageSize;
-                List<User> records = userService.selectAll(isDeleted, pageSize, offset);
+                List<UserEntity> records = userService.selectAll(isDeleted, pageSize, offset);
                 long totalPages = (total + pageSize - 1) / pageSize;
                 log.info("Paginated users: total {} records, current page {} records, total pages {}",
                                 total, records.size(), totalPages);
@@ -84,10 +88,11 @@ public class UserController {
                         @ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
-        public ApiResult<User> getUser(@Parameter(description = "User ID") @PathVariable("id") Long id) {
-                LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-                lambdaQueryWrapper.eq(User::getId, id);
-                User user = userService.getBaseMapper().selectOne(lambdaQueryWrapper);
+        public ApiResult<UserEntity> getUser(
+                        @Parameter(description = "User ID") @PathVariable("id") @Size(max = 20, message = "User ID must not exceed 20 characters") String id) {
+                LambdaQueryWrapper<UserEntity> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+                lambdaQueryWrapper.eq(UserEntity::getId, id);
+                UserEntity user = userService.getBaseMapper().selectOne(lambdaQueryWrapper);
                 log.info("User with id {}: {}", id, user);
                 return new ApiResult<>(user);
         }
@@ -98,7 +103,8 @@ public class UserController {
                         @ApiResponse(responseCode = "200", description = "Successfully deleted user"),
                         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
-        public ApiResult<DeleteResult> deleteUser(@Parameter(description = "User ID") @PathVariable("id") Long id) {
+        public ApiResult<DeleteResult> deleteUser(
+                        @Parameter(description = "User ID") @PathVariable("id") @Size(max = 20, message = "User ID must not exceed 20 characters") String id) {
                 boolean result = userService.removeById(id);
 
                 if (result) {
@@ -131,15 +137,15 @@ public class UserController {
                         @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
-        public ApiResult<User> putUser(@Valid @RequestBody User userParam,
-                        @Parameter(description = "User ID") @PathVariable("id") Long id) {
+        public ApiResult<UserEntity> putUser(@Valid @RequestBody UserEntity userParam,
+                        @Parameter(description = "User ID") @PathVariable("id") @Size(max = 20, message = "User ID must not exceed 20 characters") String id) {
 
-                LambdaUpdateWrapper<User> updateWrapper = new LambdaUpdateWrapper<>();
-                updateWrapper.eq(User::getId, id)
-                                .set(userParam.getName() != null, User::getName, userParam.getName())
-                                .set(userParam.getAge() != null, User::getAge, userParam.getAge())
-                                .set(userParam.getEmail() != null, User::getEmail, userParam.getEmail())
-                                .set(userParam.getDepartmentId() != null, User::getDepartmentId,
+                LambdaUpdateWrapper<UserEntity> updateWrapper = new LambdaUpdateWrapper<>();
+                updateWrapper.eq(UserEntity::getId, id)
+                                .set(userParam.getName() != null, UserEntity::getName, userParam.getName())
+                                .set(userParam.getAge() != null, UserEntity::getAge, userParam.getAge())
+                                .set(userParam.getEmail() != null, UserEntity::getEmail, userParam.getEmail())
+                                .set(userParam.getDepartmentId() != null, UserEntity::getDepartmentId,
                                                 userParam.getDepartmentId());
 
                 boolean result = userService.update(updateWrapper);
@@ -171,8 +177,8 @@ public class UserController {
                         @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
-        public ApiResult<User> saveUser(@Valid @RequestBody User userParam) {
-                User user = new User();
+        public ApiResult<UserEntity> saveUser(@Valid @RequestBody UserEntity userParam) {
+                UserEntity user = new UserEntity();
                 user.setAge(userParam.getAge());
                 user.setName(userParam.getName());
                 user.setEmail(userParam.getEmail());
@@ -192,16 +198,16 @@ public class UserController {
                         @ApiResponse(responseCode = "200", description = "Successfully retrieved paginated users"),
                         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
-        public PagedApiResult<List<User>> findPage(
-                        @Parameter(description = "Page number (default: 1)") @RequestParam(defaultValue = "1") Integer pageNum,
-                        @Parameter(description = "Page size (default: 10)") @RequestParam(defaultValue = "10") Integer pageSize,
+        public PagedApiResult<List<UserEntity>> findPage(
+                        @Parameter(description = "Page number (default: 1, max=10)", schema = @Schema(type = "integer", maximum = "10", example = "1")) @RequestParam(defaultValue = "1") @Max(10) Integer pageNum,
+                        @Parameter(description = "Page size (default: 10, max=50)", schema = @Schema(type = "integer", maximum = "50", example = "10")) @RequestParam(defaultValue = "10") @Max(50) Integer pageSize,
                         @Parameter(description = "Filter by name") @RequestParam(required = false) String name) {
-                IPage<User> page = new Page<>(pageNum, pageSize);
-                LambdaQueryWrapper<User> lambda = new LambdaQueryWrapper<>();
+                IPage<UserEntity> page = new Page<>(pageNum, pageSize);
+                LambdaQueryWrapper<UserEntity> lambda = new LambdaQueryWrapper<>();
                 if (name != null && !"".equals(name)) {
-                        lambda.like(User::getName, name);
+                        lambda.like(UserEntity::getName, name);
                 }
-                IPage<User> userPage = userService.page(page, lambda);
+                IPage<UserEntity> userPage = userService.page(page, lambda);
                 log.info("Paginated users: total {} records, current page {} records, total pages {}",
                                 userPage.getTotal(), userPage.getRecords().size(), userPage.getPages());
                 return new PagedApiResult<>(userPage.getTotal(), userPage.getPages(), userPage.getRecords().size(),
