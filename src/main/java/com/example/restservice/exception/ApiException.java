@@ -7,6 +7,17 @@ import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
+/**
+ * Custom exception class for API errors.
+ * This exception is used throughout the application to handle business logic
+ * errors
+ * and provide structured error responses with HTTP status codes, error codes,
+ * and
+ * optional field-level validation errors.
+ * 
+ * @author Application Development Team
+ * @since 1.0
+ */
 @Data
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)

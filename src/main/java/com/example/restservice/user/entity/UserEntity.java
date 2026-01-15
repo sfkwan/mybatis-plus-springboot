@@ -22,6 +22,16 @@ import jakarta.validation.constraints.Size;
 
 import lombok.Data;
 
+/**
+ * User entity class representing a system user with profile and metadata
+ * information.
+ * Uses MyBatis Plus annotations for ORM mapping and soft delete functionality.
+ * Includes validation annotations and Swagger documentation for API
+ * documentation.
+ * 
+ * @author Application Development Team
+ * @since 1.0
+ */
 @Data
 @TableName("`user`")
 @Schema(description = "User entity representing a system user with profile and metadata information")

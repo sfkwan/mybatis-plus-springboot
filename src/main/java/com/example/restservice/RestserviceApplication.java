@@ -8,6 +8,22 @@ import io.swagger.v3.oas.models.servers.Server;
 
 import io.swagger.v3.oas.models.OpenAPI;
 
+/**
+ * Main Spring Boot application class for the REST Service.
+ * This application provides user management REST APIs with MyBatis Plus
+ * integration,
+ * H2 database support, and comprehensive error handling.
+ * 
+ * Features:
+ * - User CRUD operations via REST endpoints
+ * - MyBatis Plus ORM framework integration
+ * - OpenAPI/Swagger documentation
+ * - Data validation and error handling
+ * - Security configuration with Basic Auth
+ * 
+ * @author Application Development Team
+ * @since 1.0
+ */
 @SpringBootApplication
 @MapperScan("com.example.restservice.user.mapper")
 

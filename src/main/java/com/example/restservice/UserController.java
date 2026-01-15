@@ -44,6 +44,24 @@ import com.example.restservice.genericresponse.DeleteResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * REST Controller for user management endpoints.
+ * Provides CRUD operations and pagination for user entities.
+ * All endpoints produce JSON responses and support comprehensive error
+ * handling.
+ * 
+ * Endpoints:
+ * - GET /users - Get all users with pagination and optional deleted status
+ * filter
+ * - GET /users/{id} - Get a specific user by ID
+ * - POST /users - Create a new user
+ * - PUT /users/{id} - Update an existing user
+ * - DELETE /users/{id} - Delete a user
+ * - GET /users/page - Get users with pagination and optional name filter
+ * 
+ * @author Application Development Team
+ * @since 1.0
+ */
 @RestController
 @RequestMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
@@ -53,6 +71,16 @@ import lombok.extern.slf4j.Slf4j;
 public class UserController {
         private final UserService userService;
 
+        /**
+         * Retrieves all users with pagination and optional filtering by deleted status.
+         * Bypasses automatic soft delete filtering to allow retrieval of deleted
+         * records.
+         * 
+         * @param pageNum   the page number (default: 1, max: 10)
+         * @param pageSize  the page size (default: 10, max: 50)
+         * @param isDeleted filter parameter: 0 for active, 1 for deleted, null for all
+         * @return paginated list of users with total count and page information
+         */
         @GetMapping("")
         @Operation(summary = "Get all users", description = "Retrieves a list of all users, optionally filtered by deleted status")
         @ApiResponses(value = {

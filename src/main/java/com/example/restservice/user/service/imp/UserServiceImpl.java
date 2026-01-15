@@ -12,12 +12,27 @@ import com.example.restservice.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Implementation of UserService interface.
+ * Provides business logic for user management operations.
+ * Extends MyBatis Plus ServiceImpl for inherited CRUD functionality.
+ * 
+ * @author Application Development Team
+ * @since 1.0
+ */
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> implements UserService {
 
     private final UserMapper userMapper;
 
+    /**
+     * Tests QueryWrapper functionality by retrieving users with age greater than or
+     * equal to specified value.
+     * 
+     * @param age the minimum age to filter by
+     * @return list of users matching the age criteria
+     */
     @Override
     public List<UserEntity> testQueryWrapper(int age) {
         QueryWrapper<UserEntity> userQueryWrapper = new QueryWrapper<>();

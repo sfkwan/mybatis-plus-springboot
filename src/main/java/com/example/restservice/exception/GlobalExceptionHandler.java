@@ -15,10 +15,29 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Global exception handler for the REST Service.
+ * Handles various types of exceptions and converts them to standardized error
+ * responses.
+ * Provides structured error information including HTTP status codes, error
+ * messages,
+ * and field-level validation errors.
+ * 
+ * @author Application Development Team
+ * @since 1.0
+ */
 @ControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
 
+    /**
+     * Handles ApiException and converts it to an ErrorResponse.
+     * 
+     * @param ex      the ApiException that was thrown
+     * @param request the current HTTP request
+     * @return ResponseEntity containing the ErrorResponse with appropriate HTTP
+     *         status
+     */
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ErrorResponse> handleApiException(ApiException ex, HttpServletRequest request) {
         log.error("API Exception: {}", ex.getMessage());
@@ -35,6 +54,14 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, status);
     }
 
+    /**
+     * Handles validation exceptions from request body validation.
+     * Extracts field-level errors and includes them in the response.
+     * 
+     * @param ex      the MethodArgumentNotValidException that was thrown
+     * @param request the current HTTP request
+     * @return ResponseEntity with ErrorResponse containing field validation errors
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex,
             HttpServletRequest request) {
@@ -65,7 +92,16 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-    // Handles @Validated on query/path params
+    /**
+     * Handles constraint violations from query and path parameter validation.
+     * Extracts constraint violation details and includes them in the error
+     * response.
+     * 
+     * @param ex      the ConstraintViolationException that was thrown
+     * @param request the current HTTP request
+     * @return ResponseEntity with ErrorResponse containing constraint violation
+     *         details
+     */
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponse> handleConstraintViolation(
             ConstraintViolationException ex, HttpServletRequest request) {
@@ -92,6 +128,14 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
+    /**
+     * Handles all other unexpected exceptions not covered by specific handlers.
+     * Provides a generic error response for any unhandled exceptions.
+     * 
+     * @param ex      the Exception that was thrown
+     * @param request the current HTTP request
+     * @return ResponseEntity with ErrorResponse for internal server error
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGlobalException(Exception ex, HttpServletRequest request) {
         log.error("Unexpected error: {}", ex.getMessage(), ex);
