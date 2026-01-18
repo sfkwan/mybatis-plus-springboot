@@ -16,6 +16,23 @@ spring:
         - classpath:db/schema-h2.sql
       data-locations:
         - classpath:db/data-h2.sql
+  # Redis configuration
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 2000ms
+      jedis:
+        pool:
+          max-active: 8
+          max-wait: -1ms
+          max-idle: 8
+          min-idle: 0
+  cache:
+    type: redis
+    redis:
+      time-to-live: 600000 # 10 minutes in milliseconds
+      cache-null-values: false
 logging:
   level:
     "[com.example.restservice]": DEBUG
