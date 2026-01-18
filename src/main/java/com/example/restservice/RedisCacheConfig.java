@@ -1,6 +1,7 @@
 package com.example.restservice;
 
 import java.time.Duration;
+import java.util.Objects;
 
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -22,30 +23,33 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 @EnableCaching
 public class RedisCacheConfig {
 
-    @Bean
-    public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-        Duration ttl = Duration.ofMinutes(10);
+        @Bean
+        public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+                Duration ttl = Duration.ofMinutes(10);
 
-        // Create ObjectMapper with JavaTimeModule for ZonedDateTime support
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        // Enable default typing to store class info in JSON, preventing LinkedHashMap cast issues
-        objectMapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance,
-                ObjectMapper.DefaultTyping.NON_FINAL,
-                JsonTypeInfo.As.PROPERTY);
+                // Create ObjectMapper with JavaTimeModule for ZonedDateTime support
+                ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper.registerModule(new JavaTimeModule());
+                // Enable default typing to store class info in JSON, preventing LinkedHashMap
+                // cast issues
+                objectMapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance,
+                                ObjectMapper.DefaultTyping.NON_FINAL,
+                                JsonTypeInfo.As.PROPERTY);
 
-        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(ttl) // Cache TTL: 10 minutes
-                .serializeKeysWith(
-                        RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-                .serializeValuesWith(
-                        RedisSerializationContext.SerializationPair
-                                .fromSerializer(new GenericJackson2JsonRedisSerializer(objectMapper)))
-                .disableCachingNullValues();
+                RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
+                                .entryTtl(Objects.requireNonNull(ttl)) // Cache TTL: 10 minutes
+                                .serializeKeysWith(
+                                                RedisSerializationContext.SerializationPair
+                                                                .fromSerializer(new StringRedisSerializer()))
+                                .serializeValuesWith(
+                                                RedisSerializationContext.SerializationPair
+                                                                .fromSerializer(new GenericJackson2JsonRedisSerializer(
+                                                                                objectMapper)))
+                                .disableCachingNullValues();
 
-        return RedisCacheManager.builder(connectionFactory)
-                .cacheDefaults(config)
-                .transactionAware()
-                .build();
-    }
+                return RedisCacheManager.builder(Objects.requireNonNull(connectionFactory))
+                                .cacheDefaults(config)
+                                .transactionAware()
+                                .build();
+        }
 }
