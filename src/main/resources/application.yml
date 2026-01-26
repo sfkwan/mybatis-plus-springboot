@@ -42,3 +42,14 @@ springdoc:
     operationsSorter: alpha
     tagsSorter: alpha
   # writer-with-order-by-keys: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    export:
+      prometheus:
+        enabled: true
