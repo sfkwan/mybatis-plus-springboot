@@ -89,7 +89,8 @@ public class UserController {
                         @Parameter(description = "Filter by deleted status (0 for not deleted, 1 for deleted)") @RequestParam(required = false) Integer isDeleted) {
 
                 IPage<UserEntity> userPage = userService.getAllUsersPage(pageNum, pageSize, isDeleted);
-                return new PagedApiResult<>(userPage.getTotal(), userPage.getPages(), userPage.getRecords().size(), userPage.getRecords());
+                return new PagedApiResult<>(userPage.getTotal(), userPage.getPages(), userPage.getRecords().size(),
+                                userPage.getRecords());
         }
 
         /**
