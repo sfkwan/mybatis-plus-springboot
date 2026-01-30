@@ -133,10 +133,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
         if (name != null && !"".equals(name)) {
             lambda.like(UserEntity::getName, name);
         }
-        IPage<UserEntity> userPage = this.page(page, lambda);
-        log.info("Paginated users: total {} records, current page {} records, total pages {}",
-                userPage.getTotal(), userPage.getRecords().size(), userPage.getPages());
-        return userPage;
+        IPage<UserEntity> records = this.page(page, lambda);
+        log.atInfo().setMessage(
+                "findPage")
+                .addKeyValue("totalRecords", total)
+                .addKeyValue("pageSize", records.size())
+                .addKeyValue("totalPages", totalPages)
+                .log();
+        return records;
     }
 
     @Override
@@ -145,8 +149,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
         long offset = (pageNum - 1L) * pageSize;
         List<UserEntity> records = userMapper.selectAll(isDeleted, pageSize, offset);
         long totalPages = (total + pageSize - 1) / pageSize;
-        log.info("Paginated users: total {} records, current page {} records, total pages {}",
-                total, records.size(), totalPages);
+
+        log.atInfo().setMessage(
+                "getAllUsersPage")
+                .addKeyValue("totalRecords", total)
+                .addKeyValue("pageSize", records.size())
+                .addKeyValue("totalPages", totalPages)
+                .log();
 
         IPage<UserEntity> page = new Page<>(pageNum, pageSize);
         page.setTotal(total);

@@ -192,6 +192,7 @@ public class UserController {
                         @Parameter(description = "Page number (default: 1, max=10)", schema = @Schema(type = "integer", maximum = "10", example = "1")) @RequestParam(defaultValue = "1") @Max(10) Integer pageNum,
                         @Parameter(description = "Page size (default: 10, max=50)", schema = @Schema(type = "integer", maximum = "50", example = "10")) @RequestParam(defaultValue = "10") @Max(50) Integer pageSize,
                         @Parameter(description = "Filter by name") @RequestParam(required = false) String name) {
+                                
                 IPage<UserEntity> users = userService.findPage(pageNum, pageSize, name);
                 return new PagedApiResult<>(users.getTotal(), users.getPages(), users.getRecords().size(),
                                 users.getRecords());

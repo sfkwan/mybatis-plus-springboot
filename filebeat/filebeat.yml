@@ -1,0 +1,24 @@
+filebeat.inputs:
+  - type: filestream
+    id: structured-log-input
+    enabled: true
+    paths:
+      - /var/log/app/application.json.log
+    parsers:
+      - ndjson:
+        overwrite_keys: true
+        add_error_key: true
+
+processors:
+  - add_host_metadata: ~
+  - add_cloud_metadata: ~
+  - drop_fields:
+      fields: ["host", "agent"]
+
+output.elasticsearch:
+  hosts: ["http://elasticsearch:9200"]
+  index: "structured-logs-%{+yyyy.MM.dd}"
+  allow_older_versions: true
+
+setup.template.name: "filebeat-9.2.4"
+setup.template.pattern: "structured-logs-"
