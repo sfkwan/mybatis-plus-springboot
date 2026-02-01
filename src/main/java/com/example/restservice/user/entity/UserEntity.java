@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 
@@ -32,6 +33,7 @@ import lombok.Data;
  * @author Application Development Team
  * @since 1.0
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
 @TableName("`user`")
 @Schema(description = "User entity representing a system user with profile and metadata information")

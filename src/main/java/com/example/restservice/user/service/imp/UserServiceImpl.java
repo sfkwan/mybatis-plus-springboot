@@ -62,7 +62,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
     }
 
     @Override
-    @Cacheable(value = "users", key = "#id")
+    @Cacheable(value = "users", key = "#id", unless = "#result == null")
     public UserEntity getUserById(String id) {
         try {
             // Simulate long database lookup
@@ -136,9 +136,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
         IPage<UserEntity> records = this.page(page, lambda);
         log.atInfo().setMessage(
                 "findPage")
-                .addKeyValue("totalRecords", total)
-                .addKeyValue("pageSize", records.size())
-                .addKeyValue("totalPages", totalPages)
+                .addKeyValue("totalRecords",
+                        records.getTotal())
+                .addKeyValue("pageSize", records.getSize())
+                .addKeyValue("totalPages", records.getPages())
                 .log();
         return records;
     }
