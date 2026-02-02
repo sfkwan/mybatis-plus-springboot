@@ -23,18 +23,18 @@ services:
     depends_on:
       - elasticsearch
 
-  filebeat:
-    image: docker.elastic.co/beats/filebeat:9.2.4
-    container_name: filebeat
+  fluent-bit:
+    image: cr.fluentbit.io/fluent/fluent-bit:3.2.2
+    container_name: fluent-bit
     user: root
     volumes:
-      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
+      - ./fluent-bit/parsers.conf:/fluent-bit/etc/parsers.conf:ro
       - ./logs:/var/log/app:ro
     networks:
       - elastic
     depends_on:
       - elasticsearch
-    command: filebeat -e --strict.perms=false
 
 networks:
   elastic:
