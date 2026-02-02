@@ -24,7 +24,7 @@ services:
       - elasticsearch
 
   fluent-bit:
-    image: cr.fluentbit.io/fluent/fluent-bit:3.2.2
+    image: fluent/fluent-bit:4.2.2
     container_name: fluent-bit
     user: root
     volumes:
