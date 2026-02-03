@@ -2,6 +2,9 @@ package com.example.restservice.user.service.imp;
 
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
@@ -35,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> implements UserService {
 
     private final UserMapper userMapper;
+    private final ObjectMapper objectMapper;
 
     /**
      * Tests QueryWrapper functionality by retrieving users with age greater than or
@@ -80,7 +84,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
     }
 
     @Override
-    public UserEntity createUser(UserEntity userParam) {
+    public UserEntity createUser(UserEntity userParam) throws JsonProcessingException {
         UserEntity user = new UserEntity();
         user.setAge(userParam.getAge());
         user.setName(userParam.getName());
@@ -88,7 +92,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity> impleme
         user.setDepartmentId(userParam.getDepartmentId());
 
         this.save(user);
-        log.info("Save user: {}", user);
+        log.atInfo()
+                .setMessage(objectMapper.writeValueAsString(user))
+                .addKeyValue("action", "createUser")
+                .log();
         return user;
     }
 

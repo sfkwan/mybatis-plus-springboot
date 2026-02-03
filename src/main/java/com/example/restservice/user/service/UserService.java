@@ -5,6 +5,7 @@ import java.util.List;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.restservice.user.entity.UserEntity;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 public interface UserService
         extends IService<UserEntity> {
@@ -48,7 +49,7 @@ public interface UserService
      * @param userParam the user data to create
      * @return the created user entity
      */
-    UserEntity createUser(UserEntity userParam);
+    UserEntity createUser(UserEntity userParam) throws JsonProcessingException;
 
     /**
      * Updates an existing user.

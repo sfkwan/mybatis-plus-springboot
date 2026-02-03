@@ -1,5 +1,6 @@
 package com.example.restservice;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -176,7 +177,7 @@ public class UserController {
                         @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
-        public ApiResult<UserEntity> saveUser(@Valid @RequestBody UserEntity userParam) {
+        public ApiResult<UserEntity> saveUser(@Valid @RequestBody UserEntity userParam) throws JsonProcessingException {
                 UserEntity user = userService.createUser(userParam);
                 return new ApiResult<>(user);
         }
