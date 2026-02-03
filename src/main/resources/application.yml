@@ -37,6 +37,8 @@ logging:
   level:
     "[com.example.restservice]": DEBUG
     "[com.baomidou.mybatisplus]": DEBUG
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
 springdoc:
   swagger-ui:
     operationsSorter: alpha
@@ -46,10 +48,18 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
+        include: health,info,metrics,prometheus,traces
   metrics:
     tags:
       application: ${spring.application.name}
     export:
       prometheus:
         enabled: true
+    enable:
+      all: true
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    tracing:
+      endpoint: http://collector:4317/v1/traces
