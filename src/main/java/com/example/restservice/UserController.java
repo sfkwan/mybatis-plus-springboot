@@ -1,6 +1,9 @@
 package com.example.restservice;
 
+import com.example.restservice.exception.ApiException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -40,6 +46,7 @@ import com.example.restservice.genericresponse.DeleteResult;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.client.RestClient;
 
 /**
  * REST Controller for user management endpoints.
@@ -67,6 +74,8 @@ import lombok.extern.slf4j.Slf4j;
 @Tag(name = "User Management", description = "APIs for managing users")
 public class UserController {
         private final UserService userService;
+        private final RestClient restClient;
+        private final ObjectMapper objectMapper;
 
         /**
          * Retrieves all users with pagination and optional filtering by deleted status.
@@ -155,8 +164,10 @@ public class UserController {
                         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
         public ApiResult<UserEntity> putUser(@Valid @RequestBody UserEntity userParam,
-                        @Parameter(description = "User ID") @PathVariable("id") @Size(max = 20, message = "User ID must not exceed 20 characters") String id) {
-                UserEntity updatedUser = userService.updateUser(id, userParam);
+                        @Parameter(description = "User ID") @PathVariable("id") @Size(max = 20, message = "User ID must not exceed 20 characters") String id) throws URISyntaxException, JsonProcessingException {
+                String userId = objectMapper.readValue(
+                        restClient.get().uri(new URI("/users/" + id)).retrieve().body(String.class), new TypeReference<HashMap<String, HashMap<String, String>>>() {}).get("value").get("id");
+                UserEntity updatedUser = userService.updateUser(userId, userParam);
                 return new ApiResult<>(updatedUser);
         }
 
