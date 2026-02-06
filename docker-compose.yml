@@ -60,7 +60,7 @@ services:
       retries: 3
 
   jaeger:
-    image: jaegertracing/all-in-one:latest
+    image: jaegertracing/jaeger:latest
     container_name: mybatis-plus-jaeger
     ports:
       - "5775:5775/udp"
