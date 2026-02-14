@@ -13,6 +13,8 @@
                 <version>[ignore]</version>
                 <levelValue>[ignore]</levelValue>
             </fieldNames>
+            <includeMdcFields>true</includeMdcFields>
+            <mdcFieldsFieldName>[ignore]</mdcFieldsFieldName>
         </encoder>
     </appender>
 
@@ -32,6 +34,8 @@
                 <levelValue>[ignore]</levelValue>
             </fieldNames>
             <customFields>{"application":"${appName}"}</customFields>
+            <includeMdcFields>true</includeMdcFields>
+            <mdcFieldsFieldName>[ignore]</mdcFieldsFieldName>
         </encoder>
     </appender>
 
