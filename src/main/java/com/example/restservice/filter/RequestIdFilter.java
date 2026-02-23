@@ -24,7 +24,7 @@ import java.util.UUID;
 public class RequestIdFilter implements Filter {
 
     private static final String REQUEST_ID_HEADER = "x-request-id";
-    private static final String REQUEST_ID_MDC_KEY = "requestId";
+    private static final String REQUEST_ID_MDC_KEY = "http.request.id";
 
     /**
      * Filters the request to extract or generate a request ID and put it in MDC.
