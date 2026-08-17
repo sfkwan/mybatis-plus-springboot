@@ -91,7 +91,7 @@ public class UserController {
         @Operation(summary = "Get all users", description = "Retrieves a list of all users, optionally filtered by deleted status")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "200", description = "Successfully retrieved users"),
-                        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+                        @ApiResponse(responseCode = "400", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
         public PagedApiResult<List<UserEntity>> getAllUsers(
                         @Parameter(description = "Page number (default: 1, max: 10)", schema = @Schema(type = "integer", maximum = "10", example = "1")) @RequestParam(defaultValue = "1") @Max(10) Integer pageNum,
@@ -164,9 +164,12 @@ public class UserController {
                         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
         public ApiResult<UserEntity> putUser(@Valid @RequestBody UserEntity userParam,
-                        @Parameter(description = "User ID") @PathVariable("id") @Size(max = 20, message = "User ID must not exceed 20 characters") String id) throws URISyntaxException, JsonProcessingException {
+                        @Parameter(description = "User ID") @PathVariable("id") @Size(max = 20, message = "User ID must not exceed 20 characters") String id)
+                        throws URISyntaxException, JsonProcessingException {
                 String userId = objectMapper.readValue(
-                        restClient.get().uri(new URI("/users/" + id)).retrieve().body(String.class), new TypeReference<HashMap<String, HashMap<String, String>>>() {}).get("value").get("id");
+                                restClient.get().uri(new URI("/users/" + id)).retrieve().body(String.class),
+                                new TypeReference<HashMap<String, HashMap<String, String>>>() {
+                                }).get("value").get("id");
                 UserEntity updatedUser = userService.updateUser(userId, userParam);
                 return new ApiResult<>(updatedUser);
         }
@@ -204,7 +207,7 @@ public class UserController {
                         @Parameter(description = "Page number (default: 1, max=10)", schema = @Schema(type = "integer", maximum = "10", example = "1")) @RequestParam(defaultValue = "1") @Max(10) Integer pageNum,
                         @Parameter(description = "Page size (default: 10, max=50)", schema = @Schema(type = "integer", maximum = "50", example = "10")) @RequestParam(defaultValue = "10") @Max(50) Integer pageSize,
                         @Parameter(description = "Filter by name") @RequestParam(required = false) String name) {
-                                
+
                 IPage<UserEntity> users = userService.findPage(pageNum, pageSize, name);
                 return new PagedApiResult<>(users.getTotal(), users.getPages(), users.getRecords().size(),
                                 users.getRecords());
